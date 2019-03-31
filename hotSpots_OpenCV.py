@@ -4,11 +4,32 @@ import os
 from pathlib import Path
 import imutils
 from matplotlib import pyplot as plt
+import subprocess
+
+def turnOnLight():
+	subprocess.run(["sudo", "sh", "./PWM0_DC5.sh"])
+	subprocess.run(["sudo", "sh", "./PWM0_DC10.sh"])
+
+def turnOffLight():
+	subprocess.run(["sudo", "sh", "./PWM0_DC5.sh"])
+	subprocess.run(["sudo", "sh", "./PWM0_DC10.sh"])
+	subprocess.run(["sudo", "sh", "./PWM0_DC5.sh"])
+
+def takeImage():
+	subprocess.run(["sudo", "sh", "./PWM1_DC5.sh"])
+	subprocess.run(["sudo", "sh", "./PWM1_DC10.sh"])
+
+def initPWM():
+	subprocess.run(["sudo", "sh", "./PWM_0through7_INIT.sh"])
+
+initPWM();
 
 """Okay so below gives way to get an 8 bit
 grey scale image """
 #searching from folder .... This will need to be changed to the E drive
-directory='C:\VUE PRO 336'
+#directory='C:\VUE PRO 336'
+"""
+directory='/media/alex/VUE PRO 336'
 folders = []
 for d in os.listdir(directory):
     bd = os.path.join(directory, d)
@@ -23,8 +44,10 @@ for img in os.listdir(latest_img_dir):
     img = os.path.join(latest_img_dir, img)
     img_grey = cv2.imread(img, flags=0) # reads in grey
     cv2.imshow("test", img_grey)
-    cv2.waitKey(0)
+    #cv2.waitKey(0)
     cv2.destroyAllWindows()
+"""
+img_grey = cv2.imread('Keeping.jpg', flags=0)
 
 
 
@@ -44,7 +67,7 @@ hisEQ = cv2.equalizeHist(blur_img)
 cv2.imshow("Historgram Equilization", (hisEQ))
 
 
-#trying out thershold
+#trying out threshold
 retval2,threshold2 = cv2.threshold(img_grey,50,255,cv2.THRESH_BINARY)
 cv2.imshow('original',img_grey)
 cv2.imshow('threshold2',threshold2)
@@ -93,6 +116,10 @@ print("Number of Contours Detected: ", contoursCount)
 #else, turn off light
 #once this works, set a minimum size for the contour and only turn on light if at least one of the contours is this size
 #finally, get the coordinates of the biggest contour and tilt light
+if (contoursCount > 0):
+	turnOnLight();
+else:
+	turnOffLight();
 
 
 # Isolate largest contour

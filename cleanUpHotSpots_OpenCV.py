@@ -4,11 +4,36 @@ import os
 from pathlib import Path
 import imutils
 from matplotlib import pyplot as plt
+import subprocess
+from time import sleep
+
+def turnOnLight():
+	subprocess.run(["sudo", "sh", "./PWM0_DC5.sh"])
+	subprocess.run(["sudo", "sh", "./PWM0_DC10.sh"])
+
+def turnOffLight():
+	subprocess.run(["sudo", "sh", "./PWM0_DC5.sh"])
+	subprocess.run(["sudo", "sh", "./PWM0_DC10.sh"])
+	subprocess.run(["sudo", "sh", "./PWM0_DC5.sh"])
+
+def takeImage():
+	subprocess.run(["sudo", "sh", "./PWM1_DC5.sh"])
+	sleep(0.15)
+	subprocess.run(["sudo", "sh", "./PWM1_DC10.sh"])
+	sleep(7.5) #need to wait for image to be taken and be recognized by os
+
+def initPWM():
+	subprocess.run(["sudo", "sh", "./PWM_0through7_INIT.sh"])
+	sleep(0.15)
+
+initPWM();
+
+takeImage();
 
 """Okay so below gives way to get an 8 bit
 grey scale image """
-#searching from folder .... This will need to be changed to the E drive
-directory='C:\VUE PRO 336'
+#hardcoded directory path
+directory='/media/alex/VUE PRO 336'
 folders = []
 for d in os.listdir(directory):
     bd = os.path.join(directory, d)
@@ -19,7 +44,7 @@ print (latest_img_dir)
 latest_img_dir = latest_img_dir.replace('\\','/')
 print(latest_img_dir)
 #temp latest directory for testing
-latest_img_dir = 'C:/VUE PRO 336/20190319_224041/'
+#latest_img_dir = 'C:/VUE PRO 336/20190319_224041/'
 
 """ All the images in the most recent folder are stored into images[]"""
 images = []
@@ -100,20 +125,17 @@ cv2.imshow("Contours", color)
 contoursCount = len(contours)
 print("Number of Contours Detected: ", contoursCount)
 
-#Alex: TODO: if contoursCount > 0, turn on light
+#Alex: TODO if contoursCount > 0, turn on light
 #else, turn off light
 #once this works, set a minimum size for the contour and only turn on light if at least one of the contours is this size
 #finally, get the coordinates of the biggest contour and tilt light
+if (contoursCount > 0):
+	turnOnLight();
+	# Isolate largest contour
+	contour_sizes = [(cv2.contourArea(contour), contour) for contour in contours]
+	biggest_contour = max(contour_sizes, key=lambda x: x[0])[1]
 
-
-# Isolate largest contour
-contour_sizes = [(cv2.contourArea(contour), contour) for contour in contours]
-biggest_contour = max(contour_sizes, key=lambda x: x[0])[1]
-
-mask = numpy.zeros(openingFilter.shape, numpy.uint8)
-show_biggest_contour = cv2.drawContours(mask, [biggest_contour], -1, 255, -1)
-
-cv2.imshow('Biggest Contour', show_biggest_contour)
-
-
-cv2.waitKey(0)
+	mask = numpy.zeros(openingFilter.shape, numpy.uint8)
+	show_biggest_contour = cv2.drawContours(mask, [biggest_contour], -1, 255, -1)
+else:
+	turnOffLight();

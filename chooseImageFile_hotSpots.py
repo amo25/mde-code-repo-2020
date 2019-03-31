@@ -3,6 +3,8 @@ import numpy
 import imutils
 from matplotlib import pyplot as plt
 
+
+
 """Okay so below gives way to get an 8 bit
 grey scale image """
 org_img = cv2.imread('sheepDog.jpg')
