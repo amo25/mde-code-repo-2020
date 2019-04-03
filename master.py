@@ -18,6 +18,18 @@ import imutils
 import subprocess
 from time import sleep
 
+def turnLightLeft():
+    subprocess.run(["sudo", "sh", "./PWM2_DC_6_4_5.sh"])
+    #todo add delay?
+    
+def turnLightRight():
+    subprocess.run(["sudo", "sh", "./PWM2_DC_8_5_5.sh"])
+    #todo add delay?
+    
+def turnLightCenter():
+    subprocess.run(["sudo", "sh", "./PWM2_DC_7_5.sh"])
+    #todo add delay?
+
 def turnOnLight():
     subprocess.run(["sudo", "sh", "./PWM0_DC5.sh"])
     subprocess.run(["sudo", "sh", "./PWM0_DC10.sh"])
@@ -76,15 +88,13 @@ def mostRecentPhoto(passed_directory):
     return(img_grey)
     
 def processImage():
-    """
-    :return isolated_largest_contour
-
-
-    Reads in most recent photot from mostRecentPhoto.
-    Blurs the image to remove some of the noise and then
-    converts the image to binary using a thershold.  Then
-    the largest contour is found.
-    """
+    
+    # Reads in most recent photot from mostRecentPhoto.
+    # Blurs the image to remove some of the noise and then
+    # converts the image to binary using a thershold.  Then
+    # the largest contour is found.
+    
+    
     print("in process")
     img_grey = mostRecentPhoto('/media/alex/VUE PRO 336')
 
@@ -135,6 +145,7 @@ def processImage():
 
     # Isolate largest contour
     if (contoursCount > 0):
+        turnOnLight()
         contour_sizes = [(cv2.contourArea(contour), contour) for contour in contours]
         biggest_contour = max(contour_sizes, key=lambda x: x[0])[1]
 
@@ -143,18 +154,19 @@ def processImage():
 
         return(isolated_biggest_contour)
     else:
-        print("contoursCount" + contoursCount)
+        turnOffLight()
+        #print("contoursCount" + str(contoursCount))
         return None
         
 def locate_contour_x_coord(grey_image):
-    """
-    :param: isolated_bigest_countour
+    
+    # parameter isolated_bigest_countour
    
-    Reads image which contains the largest contour of the orginal image.
-    Then the center of the contour is found.  From there the image size is 
-    taken and divided into 3rds.  The X cordinate of the center contour location
-    is taken and used to dictate if the light should turn left, stay centered or turn right.
-    """
+    #Reads image which contains the largest contour of the orginal image.
+    #Then the center of the contour is found.  From there the image size is 
+    #taken and divided into 3rds.  The X cordinate of the center contour location
+    #is taken and used to dictate if the light should turn left, stay centered or turn right.
+    
     # convert the grayscale image to binary image
     ret,thresh = cv2.threshold(grey_image,127,255,0)
 
@@ -176,10 +188,13 @@ def locate_contour_x_coord(grey_image):
     print("cX " + str(cX))
     if(cX in range(1, image_third)):
         print("I'm in the first section")
+        turnLightLeft()
     elif(cX in range(image_third, ((2*image_third)))):
         print("I'm in the middle")
+        turnLightCenter()
     else:
-        print("im in far right")
+        print("im in far right") #todo remove debugging
+        turnLightRight()
 
     # Use below lines for debugging
     #     It allows you to see gridded off image
@@ -202,10 +217,17 @@ while(True):
     takeImage();
 
     largest_contour = processImage()
-    if (largest_countour != None):
+    #print(largest_contour)
+    # if (largest_contour != None):
+        # locate_contour_x_coord(largest_contour)
+        # #todo pan light in locate_con...
+    # else:
+        # print("Debug remove")
+        
+    if hasattr(largest_contour, "__len__"):
+        print("It's an array!")
         locate_contour_x_coord(largest_contour)
-        #todo pan light in locate_con...
     else:
-        print("Debug remove")
+        print("No contours detected.") #todo remove debug
         
 
