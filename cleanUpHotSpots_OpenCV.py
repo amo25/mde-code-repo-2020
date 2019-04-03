@@ -37,7 +37,7 @@ def mostRecentPhoto(passed_directory):
     latest_img_dir = max(folders, key=os.path.getctime)
     latest_img_dir = latest_img_dir.replace('\\','/')
     #temp latest directory for testing
-    latest_img_dir = 'C:/VUE PRO 336/20190319_224041/'
+    #latest_img_dir = 'C:/VUE PRO 336/20190319_224041/'
 
     """ All the images in the most recent folder are stored into images[]"""
     images = []
@@ -66,7 +66,7 @@ def processImage():
     the largest contour is found.
     """
     print("in process")
-    img_grey = mostRecentPhoto('C:\VUE PRO 336')
+    img_grey = mostRecentPhoto('/media/alex/VUE PRO 336')
 
     #blurs the image
     blur_img = cv2.blur(img_grey, (10,5))
@@ -114,13 +114,16 @@ def processImage():
 
 
     # Isolate largest contour
-    contour_sizes = [(cv2.contourArea(contour), contour) for contour in contours]
-    biggest_contour = max(contour_sizes, key=lambda x: x[0])[1]
+    if (contoursCount > 0):
+        contour_sizes = [(cv2.contourArea(contour), contour) for contour in contours]
+        biggest_contour = max(contour_sizes, key=lambda x: x[0])[1]
 
-    mask = numpy.zeros(openingFilter.shape, numpy.uint8)
-    isolated_biggest_contour = cv2.drawContours(mask, [biggest_contour], -1, 255, -1)
+        mask = numpy.zeros(openingFilter.shape, numpy.uint8)
+        isolated_biggest_contour = cv2.drawContours(mask, [biggest_contour], -1, 255, -1)
 
-    return(isolated_biggest_contour)
+        return(isolated_biggest_contour)
+    else:
+        return None
 
 def locate_contour_x_coord(grey_image):
     """
@@ -166,4 +169,8 @@ def locate_contour_x_coord(grey_image):
 #
 # if __name__ == '__main__':
 largest_contour = processImage()
-locate_contour_x_coord(largest_contour)
+if (largest_contour != None):
+    locate_contour_x_coord(largest_contour)
+    #todo pan light in locate_con...
+else:
+    print("Debug remove")
