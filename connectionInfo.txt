@@ -1,7 +1,7 @@
 In access point mode:
 Connect to Aero-*
-ssh alex@192.168.8.1
-paswd: ***REMOVED***
+ssh <removed>@192.168.8.1
+paswd: <removed>
 sudo with same paswd
 
 In client mode:
